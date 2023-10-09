@@ -6,10 +6,10 @@ export type SidebarButtonType = {
    path: string,
 }
 
-export type ThemeType = 'dark' | 'light'
+export type StatusType = 'active' | 'pending' | 'unselected'
 
 export type RouteType = {
-   ID: number;
+   id: number;
    path: string;
    description: string
    icon: ReactNode,
@@ -20,12 +20,19 @@ export type ContextValueType = {
    tableColumns: TableColumnType[] | null
    applicantStatusOptions: ApplicantStatusType[] | null
    applicantList: ApplicantDataType[] | null
+   addNewApplicant: ( newApplicant: ApplicantDataType ) => void
+   deleteApplicant: ( applicantID: number ) => void
    setTableColumns: Dispatch<SetStateAction<TableColumnType[]>>
    setApplicantStatusOptions: Dispatch<SetStateAction<ApplicantStatusType[]>>
-   setApplicantList: Dispatch<SetStateAction<ApplicantDataType[]>>
    getTransactionPerApplicant: ( params: number ) => TransactionType[] | []
    updateTransactionList: ( params: TransactionType, appointmentID?: number ) => void
-   updateApplicantStatus: ( applicantID: number, status: 'active' | 'unselected' | 'pending' ) => void
+   updateApplicantStatus: ( applicantID: number, status: StatusType ) => void
+   getScheduledAppointments: () => {
+      previous: ScheduleTableCellType[] | [];
+      present: ScheduleTableCellType[] | [];
+      future: ScheduleTableCellType[] | [];
+   },
+   updateApplicantList: ( newApplicant: ApplicantDataType, applicantID?: number ) => void
 }
 
 export type ApplicantDataType = {
@@ -62,4 +69,16 @@ export type TransactionType = {
    time: string;
    status: string
    title?: string
+}
+
+export type ScheduleTableCellType = {
+   id: number;
+   interviewer: string;
+   appointment: string;
+   applicant?: string;
+   applicantID: number;
+   role: string;
+   date: string;
+   time: string;
+   status: StatusType
 }

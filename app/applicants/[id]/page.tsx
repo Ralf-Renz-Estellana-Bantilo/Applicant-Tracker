@@ -4,7 +4,7 @@ import React, { Key, useCallback, useContext, useEffect, useState, useMemo } fro
 import { useParams, useRouter } from 'next/navigation'
 import { Avatar, Button, Chip, ChipProps, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Selection, SortDescriptor, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from '@nextui-org/react'
 import { DeleteIcon, EditIcon, PlusIcon } from '@/icons/icons'
-import { ApplicantDataType } from '@/types/types'
+import { ApplicantDataType, StatusType } from '@/types/types'
 import { ComponentContext } from '@/app/context/context'
 import { transactionColumns, transactionStatusOptions, transactions } from '@/app/data'
 
@@ -17,6 +17,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { capitalize, formatDate, formatTime } from '@/utils/utils'
 
 type TransactionType = typeof transactions[0] & { title?: string };
 
@@ -115,6 +116,10 @@ const page = () =>
 
       switch ( columnKey )
       {
+         case "date":
+            return <p>{formatDate( appointment.date )}</p>
+         case "time":
+            return <p>{formatTime( appointment.timeStart )} - {formatTime( appointment.timeEnd )}</p>
          case "status":
             return (
                <Chip className="capitalize" color={statusColorMap[appointment.status]} size="sm" variant="flat">
@@ -124,12 +129,12 @@ const page = () =>
          case "actions":
             return (
                <div className="relative flex items-center gap-2">
-                  <Tooltip className="dark" content="Edit user">
-                     <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => toggleEditAppointment( appointment )}>
+                  <Tooltip className="dark" color='success' content="Edit appointment">
+                     <span className="text-lg text-success   cursor-pointer active:opacity-50" onClick={() => toggleAppointmentDialog( appointment, 'edit' )}>
                         <EditIcon />
                      </span>
                   </Tooltip>
-                  <Tooltip className="dark" color="danger" content="Delete user">
+                  <Tooltip className="dark" color="danger" content="Delete appointment">
                      <span className="text-lg text-danger cursor-pointer active:opacity-50">
                         <DeleteIcon />
                      </span>
@@ -174,6 +179,8 @@ const page = () =>
          if ( formData.id === 0 )
          {
             formData.applicantID = applicantID
+            formData.appointment = capitalize( formData.appointment )
+            formData.interviewer = capitalize( formData.interviewer )
             formData.id = Math.floor( Math.random() * 1000 )
             formData.time = `${formData.timeStart} - ${formData.timeEnd}`
 
@@ -187,22 +194,13 @@ const page = () =>
             {
                return state.id === formData.id ? formData : state
             } ) )
-
-            if ( formData.status === 'failed' )
-            {
-               const status = 'unselected'
-               const newApplicantData = { ...applicant, status } as ApplicantDataType
-               setApplicant( newApplicantData )
-               updateApplicantStatus( applicantID, status )
-            } else
-            {
-               const status = 'active'
-               const newApplicantData = { ...applicant, status } as ApplicantDataType
-               setApplicant( newApplicantData )
-               updateApplicantStatus( applicantID, status )
-            }
             alertMessage = 'Appointment has been updated!'
          }
+
+         let status: StatusType = ( formData.status === 'failed' ? 'unselected' : 'active' ) as StatusType
+         const newApplicantData = { ...applicant, status } as ApplicantDataType
+         setApplicant( newApplicantData )
+         updateApplicantStatus( applicantID, status )
 
          toast.success( alertMessage, {
             position: "bottom-right",
@@ -219,10 +217,10 @@ const page = () =>
       }
    }
 
-   const toggleEditAppointment = ( form: TransactionType ) =>
+   const toggleAppointmentDialog = ( form: TransactionType, type: 'add' | 'edit' ) =>
    {
       onOpen()
-      form.title = 'Update Appointment'
+      form.title = type === 'add' ? 'Add New Appointment' : 'Update Appointment'
       setFormData( form )
    }
 
@@ -399,23 +397,23 @@ const page = () =>
                      <div className="flex flex-col h-full gap-2 p-2 rounded-lg">
                         <div className="flex justify-between items-center">
                            <span className='text-default-400 text-sm'>Date Applied:</span>
-                           <h3 className='text-sm text-accent-secondary font-semibold'>{applicant?.dateApplied}</h3>
+                           <h3 className='text-sm text-default-500 font-semibold'>{formatDate( applicant?.dateApplied || '' )}</h3>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className='text-default-400 text-sm'>Contact No.:</span>
-                           <h3 className='text-sm text-accent-secondary font-semibold'>{applicant?.contactNo}</h3>
+                           <h3 className='text-sm text-default-500 font-semibold'>{applicant?.contactNo}</h3>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className='text-default-400 text-sm'>Email:</span>
-                           <h3 className='text-sm text-accent-secondary font-semibold'>{applicant?.email}</h3>
+                           <h3 className='text-sm text-default-500 font-semibold'>{applicant?.email}</h3>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className='text-default-400 text-sm'>Team:</span>
-                           <h3 className='text-sm text-accent-secondary font-semibold'>{applicant?.team}</h3>
+                           <h3 className='text-sm text-default-500 font-semibold'>{applicant?.team}</h3>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className='text-default-400 text-sm'>Status:</span>
-                           <h3 className='text-sm text-accent-secondary font-semibold'>
+                           <h3 className='text-sm text-default-500 font-semibold'>
                               <Chip className="capitalize" color={statusColorMap[applicant?.status || 'active']} size="sm" variant="flat">
                                  {applicant?.status}
                               </Chip>
@@ -426,34 +424,40 @@ const page = () =>
                </div>
             </aside>
             <div className="flex flex-col justify-between flex-1 rounded-lg">
-               <Table
-                  removeWrapper
-                  aria-label="Example table with custom cells, pagination and sorting"
-                  isHeaderSticky
-                  className="dark"
-                  classNames={{
-                     wrapper: "max-h-[425px]",
-                  }}
-               >
-                  <TableHeader columns={headerColumns}>
-                     {( column ) => (
-                        <TableColumn
-                           key={column.uid}
-                           align={column.uid === "actions" ? "center" : "start"}
-                        >
-                           {column.name}
-                        </TableColumn>
-                     )}
-                  </TableHeader>
-                  <TableBody emptyContent={"No appointments found"} items={sortedItems} className="bg-blue-500">
-                     {( item ) => (
-                        <TableRow key={item.appointment}>
-                           {( columnKey ) => <TableCell>{renderCell( item, columnKey )}</TableCell>}
-                        </TableRow>
-                     )}
-                  </TableBody>
-               </Table>
-               <Button color="success" variant='light' className='rounded-lg' onPress={onOpen} endContent={<PlusIcon />}>
+               <div className="flex flex-col">
+                  <div className="flex justify-center items-center p-2">
+                     <h3 className='text-accent-primary font-semibold'>Appointment List</h3>
+                  </div>
+                  <Table
+                     removeWrapper
+                     aria-label="Example table with custom cells, pagination and sorting"
+                     isHeaderSticky
+                     className="dark"
+                     classNames={{
+                        wrapper: "max-h-[425px]",
+                     }}
+                  >
+                     <TableHeader columns={headerColumns}>
+                        {( column ) => (
+                           <TableColumn
+                              key={column.uid}
+                              align={column.uid === "actions" ? "center" : "start"}
+                           >
+                              {column.name}
+                           </TableColumn>
+                        )}
+                     </TableHeader>
+                     <TableBody emptyContent={"No appointments found"} items={sortedItems} className="bg-blue-500">
+                        {( item ) => (
+                           <TableRow key={item.appointment}>
+                              {( columnKey ) => <TableCell>{renderCell( item, columnKey )}</TableCell>}
+                           </TableRow>
+                        )}
+                     </TableBody>
+                  </Table>
+
+               </div>
+               <Button color="success" variant='light' className='rounded-lg' onClick={() => toggleAppointmentDialog( INITIAL_FORMDATA, 'add' )} endContent={<PlusIcon />}>
                   Add New Appointment
                </Button>
             </div>

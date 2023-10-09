@@ -1,46 +1,144 @@
 'use client'
 
-import { Card, CardBody, Chip, Tab, Tabs } from '@nextui-org/react'
-import React from 'react'
+import { ScheduleTableCellType, StatusType } from '@/types/types';
+import { statusColorMap } from '@/utils/utils';
+import { Card, CardBody, Chip, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from '@nextui-org/react'
+import React, { Key, useCallback, useContext, useEffect, useState } from 'react'
+import { ComponentContext } from '../context/context';
 
+type SchedOptionType = 'previous' | 'present' | 'future'
 const SchedulePage = () =>
 {
+
+   const context = useContext( ComponentContext )
+   const [schedules, setSchedules] = useState<{
+      previous: ScheduleTableCellType[] | [];
+      present: ScheduleTableCellType[] | [];
+      future: ScheduleTableCellType[] | [];
+   }>( {
+      previous: [],
+      present: [],
+      future: [],
+   } )
+
    let tabs = [
       {
-         id: "photos",
+         id: "previous",
          label: "Previous",
-         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
       },
       {
-         id: "music",
+         id: "present",
          label: "Today",
-         content: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
       },
       {
-         id: "videos",
+         id: "future",
          label: "Upcoming",
-         content: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
       }
    ];
 
+   const scheduleTableColumns = [
+      {
+         name: "INTERVIEWER",
+         uid: 'interviewer'
+      },
+      {
+         name: "APPOINTMENT",
+         uid: 'appointment'
+      },
+      {
+         name: "APPLICANT",
+         uid: 'applicant'
+      },
+      {
+         name: "ROLE",
+         uid: 'role'
+      },
+      {
+         name: "DATE",
+         uid: 'date'
+      },
+      {
+         name: "TIME",
+         uid: 'time'
+      },
+      {
+         name: "STATUS",
+         uid: 'status'
+      },
+   ]
+
+   const renderCell = useCallback( ( data: ScheduleTableCellType, columnKey: Key ) =>
+   {
+      const cellValue = data[columnKey as keyof ScheduleTableCellType];
+
+      switch ( columnKey )
+      {
+         case "status":
+            return (
+               <Chip className="capitalize" color={statusColorMap[data.status]} size="sm" variant="flat">
+                  {cellValue}
+               </Chip>
+            );
+
+         default:
+            return cellValue;
+      }
+   }, [] );
+
+   useEffect( () =>
+   {
+      if ( context )
+      {
+         const { getScheduledAppointments } = context
+         const scheduledAppointments = getScheduledAppointments()
+         setSchedules( scheduledAppointments )
+      }
+   }, [context?.applicantList] )
+
+
    return (
       <div className="flex w-full flex-col h-full">
-         <Tabs aria-label="Dynamic tabs" color='primary' variant='bordered' className='dark' fullWidth items={tabs}>
+         <Tabs aria-label="Dynamic tabs" color='success' variant='bordered' className='dark' fullWidth items={tabs}>
             {( item ) => (
                <Tab key={item.id} title={
                   <div className="flex items-center space-x-2">
                      <span>{item.label}</span>
-                     <Chip size="sm" variant="solid" color='danger' >{Math.floor( Math.random() * 11 ) + 1}</Chip>
+                     <Chip size="sm" variant="solid" color='danger' >{schedules[item.id as SchedOptionType].length}</Chip>
                   </div>
                }
                   className='w-full'>
-                  <Card className='dark'>
+                  <Card className='dark bg-transparent' shadow='none'>
                      <CardBody>
-                        {item.content}
+                        <Table
+                           removeWrapper
+                           shadow='none'
+                           color='success'
+                           selectionMode="single"
+                           aria-label="Example static collection table"
+                        >
+                           <TableHeader columns={scheduleTableColumns}>
+                              {( column ) => (
+                                 <TableColumn
+                                    key={column.uid}
+                                    align={column.uid === "actions" ? "center" : "start"}
+                                 >
+                                    {column.name}
+                                 </TableColumn>
+                              )}
+                           </TableHeader>
+                           <TableBody emptyContent={"No appointments found"} items={schedules[item.id as SchedOptionType]} className="bg-blue-500">
+                              {( item ) => (
+                                 <TableRow key={item.id}>
+                                    {( columnKey ) => <TableCell>{renderCell( item, columnKey )}</TableCell>}
+                                 </TableRow>
+                              )}
+                           </TableBody>
+                        </Table>
                      </CardBody>
                   </Card>
                </Tab>
             )}
+
          </Tabs>
       </div>
    );

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo, useState, Key, ChangeEvent, useContext } from "react";
+import React, { useCallback, useMemo, useState, Key, ChangeEvent, useContext, useEffect } from "react";
 import
 {
    Table,
@@ -25,31 +25,27 @@ import
 } from "@nextui-org/react";
 import { } from "../data";
 import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/icons/icons";
-import { capitalize } from "@/utils/utils";
+import { capitalize, getSession, setSession, statusColorMap } from "@/utils/utils";
 import { ComponentContext } from "../context/context";
 import { ApplicantDataType } from "@/types/types";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from "next/navigation";
 
-const statusColorMap: Record<string, ChipProps["color"]> = {
-   active: "success",
-   unselected: "danger",
-   pending: "warning",
-};
+type TransactionType = ApplicantDataType & { title?: string };
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "contactNo", "status", "actions"];
 
-const INITIAL_FORMDATA = {
+const INITIAL_FORMDATA: TransactionType = {
    id: 0,
-   avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
+   avatar: 'https://images.unsplash.com/broken',
    name: '',
    contactNo: '',
    email: '',
    role: '',
    team: '',
    dateApplied: '',
-   status: 'active',
+   status: 'pending',
 }
 
 const ApplicantPage = () =>
@@ -86,8 +82,8 @@ const ApplicantPage = () =>
    {
       if ( context )
       {
-         const { setApplicantList } = context
-         setApplicantList( prevState => prevState.filter( ( { id } ) => id != applicantID ) )
+         const { deleteApplicant } = context
+         deleteApplicant( applicantID )
       }
    }
 
@@ -156,13 +152,6 @@ const ApplicantPage = () =>
                   {user.email}
                </User>
             );
-         case "role":
-            return (
-               <div className="flex flex-col">
-                  <p className="text-bold text-small capitalize">{cellValue}</p>
-                  <p className="text-bold text-tiny capitalize text-default-400">{user.team}</p>
-               </div>
-            );
          case "status":
             return (
                <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
@@ -172,13 +161,13 @@ const ApplicantPage = () =>
          case "actions":
             return (
                <div className="relative flex items-center gap-2">
-                  <Tooltip className="dark" content="Details">
-                     <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => viewApplicant( user.id )}>
+                  <Tooltip className="dark" color="primary" content="Details">
+                     <span className="text-lg text-primary cursor-pointer active:opacity-50" onClick={() => viewApplicant( user.id )}>
                         <EyeIcon />
                      </span>
                   </Tooltip>
-                  <Tooltip className="dark" content="Edit user">
-                     <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => editApplicant( user.id )}>
+                  <Tooltip className="dark" color="success" content="Edit user">
+                     <span className="text-lg text-success cursor-pointer active:opacity-50" onClick={() => toggleApplicantCreationDialog( user, 'edit' )}>
                         <EditIcon />
                      </span>
                   </Tooltip>
@@ -198,7 +187,9 @@ const ApplicantPage = () =>
    {
       if ( page < pages )
       {
-         setPage( page + 1 );
+         const nextPage = pages + 1
+         setPage( nextPage );
+         setSession( 'page', nextPage )
       }
    }, [page, pages] );
 
@@ -206,7 +197,9 @@ const ApplicantPage = () =>
    {
       if ( page > 1 )
       {
-         setPage( page - 1 );
+         const prevPage = pages - 1
+         setPage( prevPage );
+         setSession( 'page', prevPage )
       }
    }, [page] );
 
@@ -214,6 +207,7 @@ const ApplicantPage = () =>
    {
       setRowsPerPage( Number( e.target.value ) );
       setPage( 1 );
+      setSession( 'page', 1 )
    }, [] );
 
    const onSearchChange = useCallback( ( value?: string ) =>
@@ -222,6 +216,7 @@ const ApplicantPage = () =>
       {
          setFilterValue( value );
          setPage( 1 );
+         setSession( 'page', 1 )
       } else
       {
          setFilterValue( "" );
@@ -232,7 +227,14 @@ const ApplicantPage = () =>
    {
       setFilterValue( "" )
       setPage( 1 )
+      setSession( 'page', 1 )
    }, [] )
+
+   const changePage = ( e: number ) =>
+   {
+      setPage( e )
+      setSession( 'page', e )
+   }
 
    const topContent = useMemo( () =>
    {
@@ -334,7 +336,7 @@ const ApplicantPage = () =>
                color="success"
                page={page}
                total={pages}
-               onChange={setPage}
+               onChange={changePage}
             />
             <div className="hidden sm:flex w-[30%] justify-end gap-2">
                <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
@@ -348,7 +350,7 @@ const ApplicantPage = () =>
       );
    }, [selectedKeys, items.length, page, pages, hasSearchFilter] );
 
-   const [formData, setFormData] = useState<ApplicantDataType>( INITIAL_FORMDATA );
+   const [formData, setFormData] = useState<TransactionType>( INITIAL_FORMDATA );
 
    const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) =>
    {
@@ -356,10 +358,11 @@ const ApplicantPage = () =>
       setFormData( { ...formData, [name]: value } );
    }
 
-   const handleAddNewApplicant = () =>
+   const handleSave = () =>
    {
       if ( context )
       {
+         const { addNewApplicant, updateApplicantList } = context
          const values = Object.values( formData )
          if ( values.includes( '' ) )
          {
@@ -375,12 +378,25 @@ const ApplicantPage = () =>
             } );
 
          }
-         formData.id = Math.floor( Math.random() * 100 )
-         const { setApplicantList } = context
-         setApplicantList( prevState => [...prevState, formData] )
+
+         const isNewApplicant = formData.id === INITIAL_FORMDATA.id
+         let alert = ''
+
+         if ( isNewApplicant )
+         {
+            addNewApplicant( formData )
+            alert = 'New applicant added!'
+         } else
+         {
+            updateApplicantList( formData, formData.id )
+            alert = 'Applicant has been updated!'
+         }
+
+         console.log( formData )
+
          setFormData( INITIAL_FORMDATA )
 
-         toast.success( 'New applicant added!', {
+         toast.success( alert, {
             position: "bottom-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -392,6 +408,23 @@ const ApplicantPage = () =>
          } );
       }
    }
+
+   const toggleApplicantCreationDialog = ( form: TransactionType, type: 'add' | 'edit' ) =>
+   {
+      onOpen()
+      form.title = type === 'add' ? 'Add New Appointment' : 'Update Appointment'
+      setFormData( form )
+
+      console.log( form )
+   }
+
+   useEffect( () =>
+   {
+      const pageNumber = Number( getSession( 'page' ) ) || 1
+
+      setPage( pageNumber )
+   }, [] )
+
 
    return (
       <>
@@ -416,18 +449,45 @@ const ApplicantPage = () =>
             <ModalContent>
                {( onClose ) => (
                   <>
-                     <ModalHeader className="flex flex-col gap-1">Add New Applicant</ModalHeader>
+                     <ModalHeader className="flex flex-col gap-1">{formData.title}</ModalHeader>
                      <ModalBody className="flex flex-col">
                         <div className="flex gap-2">
                            <div className="flex flex-1">
                               <Input
-                                 autoFocus
                                  label="Full Name:"
+                                 autoFocus
                                  name="name"
                                  isRequired
                                  value={formData.name}
                                  onChange={handleChange}
                                  placeholder="Enter fullname"
+                                 variant="bordered"
+                              />
+                           </div>
+                        </div>
+                        <div className="flex">
+                           <div className="flex flex-1">
+                              <Input
+                                 label="Email Address:"
+                                 name="email"
+                                 isRequired
+                                 value={formData.email}
+                                 onChange={handleChange}
+                                 placeholder="Enter email address"
+                                 variant="bordered"
+                              />
+                           </div>
+                        </div>
+                        <div className="flex gap-2">
+
+                           <div className="flex flex-1">
+                              <Input
+                                 label="Contact Number:"
+                                 name="contactNo"
+                                 isRequired
+                                 value={formData.contactNo}
+                                 onChange={handleChange}
+                                 placeholder="Enter contact number"
                                  variant="bordered"
                               />
                            </div>
@@ -445,33 +505,6 @@ const ApplicantPage = () =>
                            </div>
                         </div>
                         <div className="flex gap-2">
-
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Contact Number:"
-                                 name="contactNo"
-                                 isRequired
-                                 value={formData.contactNo}
-                                 onChange={handleChange}
-                                 placeholder="Enter contact number"
-                                 variant="bordered"
-                              />
-
-                           </div>
-                           <div className="flex flex-1">
-
-                              <Input
-                                 label="Email Address:"
-                                 name="email"
-                                 isRequired
-                                 value={formData.email}
-                                 onChange={handleChange}
-                                 placeholder="Enter email address"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                        <div className="flex gap-2">
                            <div className="flex flex-1">
                               <Input
                                  label="Role:"
@@ -482,8 +515,9 @@ const ApplicantPage = () =>
                                  placeholder="Enter applied role"
                                  variant="bordered"
                               />
-
                            </div>
+                        </div>
+                        <div className="flex">
                            <div className="flex flex-1">
                               <Input
                                  label="Team:"
@@ -494,7 +528,6 @@ const ApplicantPage = () =>
                                  placeholder="Enter assigned team"
                                  variant="bordered"
                               />
-
                            </div>
                         </div>
                      </ModalBody>
@@ -502,7 +535,7 @@ const ApplicantPage = () =>
                         <Button color="success" variant="flat" onPress={onClose}>
                            Close
                         </Button>
-                        <Button color="success" onClick={handleAddNewApplicant} onPress={onClose}>
+                        <Button color="success" onClick={handleSave} onPress={onClose}>
                            Save
                         </Button>
                      </ModalFooter>
