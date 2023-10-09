@@ -18,7 +18,7 @@ const SidebarButton = ( { text, path, icon }: SidebarButtonType ) =>
    const isActiveRoute = path === '/' ? pathname === path : pathname.includes( path )
 
    return (
-      <div className={`${isActiveRoute ? 'bg-blue-400 text-success backdrop-filter backdrop-blur-sm bg-opacity-10' : 'hover:bg-blue-400 hover:rounded-md hover:backdrop-filter hover:backdrop-blur-sm hover:bg-opacity-10 opacity-50'} flex items-center gap-4 p-2 font-medium rounded-md cursor-pointer  transition-colors ease`} onClick={changeRoute}>
+      <div className={`${isActiveRoute ? 'bg-green-300 text-success backdrop-filter backdrop-blur-sm bg-opacity-10' : 'hover:bg-green-300 hover:rounded-md hover:backdrop-filter hover:backdrop-blur-sm hover:bg-opacity-10 opacity-50'} flex items-center gap-4 p-2 font-medium rounded-md cursor-pointer  transition-colors ease`} onClick={changeRoute}>
          {icon}
          <span>{text}</span>
       </div>

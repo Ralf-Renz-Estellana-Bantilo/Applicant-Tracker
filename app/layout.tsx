@@ -27,6 +27,7 @@ export default async function RootLayout ( {
         <SessionProvider session={session}>
           <Content children={children} />
         </SessionProvider>
+        {/* {children} */}
       </body>
     </html>
   )

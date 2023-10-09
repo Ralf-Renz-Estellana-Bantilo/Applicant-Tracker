@@ -11,7 +11,7 @@ export default function ComponentContextProvider ( { children }: { children: Rea
    const [routes] = useState<RouteType[]>( [
       {
          id: Math.floor( Math.random() * 100 ),
-         path: '/',
+         path: '/dashboard',
          description: 'Dashboard',
          icon: <DashboardIcon />
       },
