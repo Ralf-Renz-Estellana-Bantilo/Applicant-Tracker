@@ -255,7 +255,7 @@ const transactionStatusOptions = [
    { name: "Pending", uid: "pending" },
 ];
 
-const transactions = [
+const transactionsList = [
    {
       id: Math.floor( Math.random() * 10000 ),
       applicantID: 1,
@@ -457,4 +457,4 @@ const transactions = [
 ]
 
 
-export { columns, users, statusOptions, transactionColumns, transactionStatusOptions, transactions };
+export { columns, users, statusOptions, transactionColumns, transactionStatusOptions, transactionsList };

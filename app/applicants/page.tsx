@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo, useState, Key, ChangeEvent, useContext, useEffect } from "react";
+import React, { useCallback, useMemo, useState, Key, ChangeEvent, useContext, useEffect, useRef } from "react";
 import
 {
    Table,
@@ -27,16 +27,15 @@ import { } from "../data";
 import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/icons/icons";
 import { capitalize, formatDate, getSession, setSession, statusColorMap } from "@/utils/utils";
 import { ComponentContext } from "../context/context";
-import { ApplicantDataType } from "@/types/types";
+import { ApplicantDataType, ApplicantFormDataType } from "@/types/types";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from "next/navigation";
-
-type TransactionType = ApplicantDataType & { title?: string };
+import ApplicantFormModal from "../components/modals/ApplicantFormModal";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "contactNo", "status", "actions"];
 
-const INITIAL_FORMDATA: TransactionType = {
+const INITIAL_FORMDATA: ApplicantFormDataType = {
    id: 0,
    avatar: 'https://images.unsplash.com/broken',
    name: '',
@@ -53,6 +52,7 @@ const ApplicantPage = () =>
    const { isOpen, onOpen, onOpenChange } = useDisclosure();
    const context = useContext( ComponentContext )
    const router = useRouter()
+   const [formData, setFormData] = useState<ApplicantFormDataType>( INITIAL_FORMDATA );
 
    const [filterValue, setFilterValue] = useState( "" );
    const [selectedKeys, setSelectedKeys] = useState<Selection>( new Set( [] ) );
@@ -293,7 +293,7 @@ const ApplicantPage = () =>
                         ) ) || []}
                      </DropdownMenu>
                   </Dropdown>
-                  <Button color="success" onPress={() => toggleApplicantCreationDialog( formData, 'add' )} endContent={<PlusIcon />}>
+                  <Button color="success" onPress={() => toggleApplicantCreationDialog( INITIAL_FORMDATA, 'add' )} endContent={<PlusIcon />}>
                      Add New
                   </Button>
                </div>
@@ -349,75 +349,12 @@ const ApplicantPage = () =>
       );
    }, [selectedKeys, items.length, page, pages, hasSearchFilter] );
 
-   const [formData, setFormData] = useState<TransactionType>( INITIAL_FORMDATA );
-
-   const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) =>
+   const toggleApplicantCreationDialog = ( form: ApplicantFormDataType, type: 'add' | 'edit' ) =>
    {
-      const { name, value } = e.target;
-      setFormData( { ...formData, [name]: value } );
-   }
-
-   const handleSave = () =>
-   {
-      if ( context )
-      {
-         const { addNewApplicant, updateApplicantList } = context
-         const values = Object.values( formData )
-         if ( values.includes( '' ) )
-         {
-            return toast.warn( 'Fill-out all fields!', {
-               position: "bottom-right",
-               autoClose: 3000,
-               hideProgressBar: false,
-               closeOnClick: true,
-               pauseOnHover: true,
-               draggable: true,
-               progress: undefined,
-               theme: "dark",
-            } );
-
-         }
-
-         const isNewApplicant = formData.id === INITIAL_FORMDATA.id
-         let alert = ''
-
-         if ( isNewApplicant )
-         {
-            addNewApplicant( formData )
-            console.log( {
-               formData,
-               applicants: context.applicantList
-            } )
-            alert = 'New applicant added!'
-         } else
-         {
-            updateApplicantList( formData, formData.id )
-            alert = 'Applicant has been updated!'
-         }
-
-         console.log( formData )
-
-         setFormData( INITIAL_FORMDATA )
-
-         toast.success( alert, {
-            position: "bottom-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-         } );
-      }
-   }
-
-   const toggleApplicantCreationDialog = ( form: TransactionType, type: 'add' | 'edit' ) =>
-   {
-      onOpen()
       const title = type === 'add' ? 'Add New Appointment' : 'Update Appointment'
-      const formInfo = { ...form, title }
-      setFormData( formInfo )
+      const newFormData = { ...form, title }
+      setFormData( newFormData )
+      onOpen()
    }
 
    useEffect( () =>
@@ -426,124 +363,15 @@ const ApplicantPage = () =>
       setPage( pageNumber )
    }, [] )
 
-
    return (
       <>
-         <ToastContainer position="bottom-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark" />
-         <Modal
+         <ApplicantFormModal
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            placement="top-center"
-            className="dark"
-            backdrop="blur"
-            isDismissable={false}
-         >
-            <ModalContent>
-               {( onClose ) => (
-                  <>
-                     <ModalHeader className="flex flex-col gap-1">{formData.title}</ModalHeader>
-                     <ModalBody className="flex flex-col">
-                        <div className="flex gap-2">
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Full Name:"
-                                 autoFocus
-                                 name="name"
-                                 isRequired
-                                 value={formData.name}
-                                 onChange={handleChange}
-                                 placeholder="Enter fullname"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                        <div className="flex">
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Email Address:"
-                                 name="email"
-                                 isRequired
-                                 value={formData.email}
-                                 onChange={handleChange}
-                                 placeholder="Enter email address"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                        <div className="flex gap-2">
+            formData={formData}
+            setFormData={setFormData}
+         />
 
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Contact Number:"
-                                 name="contactNo"
-                                 isRequired
-                                 value={formData.contactNo}
-                                 onChange={handleChange}
-                                 placeholder="Enter contact number"
-                                 variant="bordered"
-                              />
-                           </div>
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Date Applied:"
-                                 name="dateApplied"
-                                 type="date"
-                                 isRequired
-                                 value={formData.dateApplied}
-                                 onChange={handleChange}
-                                 placeholder="Enter date"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Role:"
-                                 name="role"
-                                 isRequired
-                                 value={formData.position}
-                                 onChange={handleChange}
-                                 placeholder="Enter applied role"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                        <div className="flex">
-                           <div className="flex flex-1">
-                              <Input
-                                 label="Team:"
-                                 name="team"
-                                 isRequired
-                                 value={formData.team}
-                                 onChange={handleChange}
-                                 placeholder="Enter assigned team"
-                                 variant="bordered"
-                              />
-                           </div>
-                        </div>
-                     </ModalBody>
-                     <ModalFooter>
-                        <Button color="success" variant="flat" onPress={onClose}>
-                           Close
-                        </Button>
-                        <Button color="success" onClick={handleSave} onPress={onClose}>
-                           Save
-                        </Button>
-                     </ModalFooter>
-                  </>
-               )}
-            </ModalContent>
-         </Modal>
          <Table
             removeWrapper
             aria-label="Example table with custom cells, pagination and sorting"

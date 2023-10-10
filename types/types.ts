@@ -121,3 +121,5 @@ export type AppoitmentStatusTableSchemaType = {
    code: AppointmentStatusType;
    description: AppointmentStatusDescType;
 }
+
+export type ApplicantFormDataType = ApplicantDataType & { title?: string };

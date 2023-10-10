@@ -3,18 +3,9 @@
 import React, { ReactNode } from 'react'
 import Sidebar from './Sidebar';
 import ComponentContextProvider from './context/context';
-import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 
 const Content = ( { children }: { children: ReactNode } ) =>
 {
-   const router = useRouter()
-   const { data: session } = useSession();
-
-   // if ( !session )
-   // {
-   //    router.push( '/login' )
-   // }
 
    return (
       <ComponentContextProvider>

@@ -144,6 +144,7 @@ const SchedulePage = () =>
                   <Card className='dark bg-transparent' shadow='none'>
                      <CardBody>
                         <Table
+                           isCompact
                            removeWrapper
                            shadow='none'
                            color='success'

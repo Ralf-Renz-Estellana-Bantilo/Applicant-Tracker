@@ -6,7 +6,7 @@ import { Avatar, Button, Chip, ChipProps, Input, Modal, ModalBody, ModalContent,
 import { DeleteIcon, EditIcon, PlusIcon } from '@/icons/icons'
 import { ApplicantDataType, StatusType } from '@/types/types'
 import { ComponentContext } from '@/app/context/context'
-import { transactionColumns, transactionStatusOptions, transactions } from '@/app/data'
+import { transactionColumns, transactionStatusOptions, transactionsList } from '@/app/data'
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
    passed: "success",
@@ -19,7 +19,7 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { capitalize, formatDate, formatTime } from '@/utils/utils'
 
-type TransactionType = typeof transactions[0] & { title?: string };
+type TransactionType = typeof transactionsList[0] & { title?: string };
 
 const INITIAL_VISIBLE_COLUMNS = ["appointment", "interviewer", "type", "mode"];
 const INITIAL_FORMDATA: TransactionType = {

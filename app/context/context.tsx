@@ -1,7 +1,7 @@
 import { ApplicantIcons, DashboardIcon, ScheduleIcon } from "@/icons/icons";
 import { ApplicantDataType, ApplicantStatusType, ContextValueType, RouteType, ScheduleTableCellType, StatusType, TableColumnType, TransactionType } from "@/types/types";
 import React, { ReactNode, createContext, useState, useEffect } from "react";
-import { columns, statusOptions, transactions, users } from "../data";
+import { columns, statusOptions, transactionsList as transactionData, users } from "../data";
 
 export const ComponentContext = createContext<ContextValueType | null>( null )
 
@@ -32,7 +32,7 @@ export default function ComponentContextProvider ( { children }: { children: Rea
    const [applicantStatusOptions, setApplicantStatusOptions] = useState<ApplicantStatusType[]>( statusOptions )
    const [applicantList, setApplicantList] = useState<ApplicantDataType[]>( users )
 
-   const [transactionList, setTransactionList] = useState<TransactionType[]>( transactions )
+   const [transactionList, setTransactionList] = useState<TransactionType[]>( transactionData )
 
    const addNewApplicant = ( newApplicant: ApplicantDataType ) =>
    {
