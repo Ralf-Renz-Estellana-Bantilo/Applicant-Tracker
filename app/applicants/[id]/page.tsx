@@ -391,7 +391,7 @@ const page = () =>
                         <Avatar src={applicant?.avatar} className="w-40 h-40 text-large" />
                         <div className="flex flex-col justify-center items-center">
                            <h3 className='font-semibold text-accent-primary text-lg'>{`${applicant?.name}`}</h3>
-                           <span className='text-accent-secondary'>{applicant?.role}</span>
+                           <span className='text-accent-secondary'>{applicant?.position}</span>
                         </div>
                      </div>
                      <div className="flex flex-col h-full gap-2 p-2 rounded-lg">

@@ -114,8 +114,10 @@ export default function ComponentContextProvider ( { children }: { children: Rea
             appointment: transaction.appointment,
             applicantID: transaction.applicantID,
             applicant: applicantInfo?.name,
-            role: applicantInfo?.role || '',
+            position: applicantInfo?.position || '',
             date: transaction.date,
+            timeStart: transaction.timeStart || '',
+            timeEnd: transaction.timeEnd || '',
             time: `${transaction.timeStart} - ${transaction.timeEnd}`,
             status: transaction.status as StatusType,
          }

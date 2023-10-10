@@ -7,6 +7,9 @@ export type SidebarButtonType = {
 }
 
 export type StatusType = 'active' | 'pending' | 'unselected'
+export type StatusDescType = 'Active' | 'Pending' | 'Not Selected'
+export type AppointmentStatusType = 'passed' | 'pending' | 'failed'
+export type AppointmentStatusDescType = 'Passed' | 'Pending' | 'Failed'
 
 export type RouteType = {
    id: number;
@@ -38,7 +41,7 @@ export type ContextValueType = {
 export type ApplicantDataType = {
    id: number;
    name: string;
-   role: string;
+   position: string;
    team: string;
    dateApplied: string;
    status: string;
@@ -77,8 +80,44 @@ export type ScheduleTableCellType = {
    appointment: string;
    applicant?: string;
    applicantID: number;
-   role: string;
+   position: string;
    date: string;
+   timeStart: string;
+   timeEnd: string;
    time: string;
    status: StatusType
+}
+
+export type ApplicantTableSchemaType = {
+   id: number;
+   name: string;
+   contactNo: string;
+   email: string;
+   position: string;
+   team: string;
+   dateApplied: string;
+   applicationStatusID: number;
+   createdBy: string;
+   status: number;
+}
+export type AppointmentTableSchemaType = {
+   id: number;
+   applicantID: string;
+   appointment: string;
+   interviewer: string;
+   date: string;
+   timeStart: string;
+   timeEnd: string;
+   appointmentStatusID: number;
+   status: number;
+}
+export type ApplicationStatusTableSchemaType = {
+   id: number;
+   code: StatusType;
+   description: StatusDescType;
+}
+export type AppoitmentStatusTableSchemaType = {
+   id: number;
+   code: AppointmentStatusType;
+   description: AppointmentStatusDescType;
 }

@@ -25,7 +25,7 @@ import
 } from "@nextui-org/react";
 import { } from "../data";
 import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/icons/icons";
-import { capitalize, getSession, setSession, statusColorMap } from "@/utils/utils";
+import { capitalize, formatDate, getSession, setSession, statusColorMap } from "@/utils/utils";
 import { ComponentContext } from "../context/context";
 import { ApplicantDataType } from "@/types/types";
 import { ToastContainer, toast } from "react-toastify";
@@ -42,7 +42,7 @@ const INITIAL_FORMDATA: TransactionType = {
    name: '',
    contactNo: '',
    email: '',
-   role: '',
+   position: '',
    team: '',
    dateApplied: '',
    status: 'pending',
@@ -71,11 +71,6 @@ const ApplicantPage = () =>
    const viewApplicant = ( applicantID: number ) =>
    {
       router.push( `/applicants/${applicantID}` )
-   }
-
-   const editApplicant = ( applicantID: number ) =>
-   {
-      console.log( applicantID )
    }
 
    const deleteApplicant = ( applicantID: number ) =>
@@ -152,6 +147,10 @@ const ApplicantPage = () =>
                   {user.email}
                </User>
             );
+         case "dateApplied":
+            return (
+               <p>{formatDate( user.dateApplied )}</p>
+            )
          case "status":
             return (
                <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
@@ -294,7 +293,7 @@ const ApplicantPage = () =>
                         ) ) || []}
                      </DropdownMenu>
                   </Dropdown>
-                  <Button color="success" onPress={onOpen} endContent={<PlusIcon />}>
+                  <Button color="success" onPress={() => toggleApplicantCreationDialog( formData, 'add' )} endContent={<PlusIcon />}>
                      Add New
                   </Button>
                </div>
@@ -385,6 +384,10 @@ const ApplicantPage = () =>
          if ( isNewApplicant )
          {
             addNewApplicant( formData )
+            console.log( {
+               formData,
+               applicants: context.applicantList
+            } )
             alert = 'New applicant added!'
          } else
          {
@@ -412,16 +415,14 @@ const ApplicantPage = () =>
    const toggleApplicantCreationDialog = ( form: TransactionType, type: 'add' | 'edit' ) =>
    {
       onOpen()
-      form.title = type === 'add' ? 'Add New Appointment' : 'Update Appointment'
-      setFormData( form )
-
-      console.log( form )
+      const title = type === 'add' ? 'Add New Appointment' : 'Update Appointment'
+      const formInfo = { ...form, title }
+      setFormData( formInfo )
    }
 
    useEffect( () =>
    {
       const pageNumber = Number( getSession( 'page' ) ) || 1
-
       setPage( pageNumber )
    }, [] )
 
@@ -510,7 +511,7 @@ const ApplicantPage = () =>
                                  label="Role:"
                                  name="role"
                                  isRequired
-                                 value={formData.role}
+                                 value={formData.position}
                                  onChange={handleChange}
                                  placeholder="Enter applied role"
                                  variant="bordered"

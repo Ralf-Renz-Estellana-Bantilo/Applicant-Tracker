@@ -6,7 +6,7 @@ import { ComponentContext } from './context/context';
 import { Avatar, Button } from '@nextui-org/react';
 import { UmpisaLogo } from '@/icons/icons';
 import { signIn, signOut, useSession, getProviders } from 'next-auth/react'
-import { usePathname } from 'next/navigation'
+import { redirect, usePathname } from 'next/navigation'
 
 const Sidebar = () =>
 {
@@ -43,6 +43,16 @@ function AuthButton ()
 {
    const { data: session } = useSession();
 
+   if ( !session )
+   {
+      redirect( '/login' )
+   }
+
+   const handleSignIn = () =>
+   {
+      signIn( 'google', { callbackUrl: 'http://localhost:3000/dashboard' } )
+   }
+
    const handleSignOut = () =>
    {
       signOut()
@@ -71,7 +81,7 @@ function AuthButton ()
       <>
          <div className="flex flex-col justify-center p-3 gap-3">
             <span >Not signed in</span>
-            <Button color="success" onClick={() => signIn()} className='font-semibold rounded-lg' variant="solid">
+            <Button color="success" onClick={handleSignIn} className='font-semibold rounded-lg' variant="solid">
                SIGN IN
             </Button>
          </div>

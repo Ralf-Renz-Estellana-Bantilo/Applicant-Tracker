@@ -1,9 +1,9 @@
 'use client'
 
-import { ScheduleTableCellType, StatusType } from '@/types/types';
-import { statusColorMap } from '@/utils/utils';
-import { Card, CardBody, Chip, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from '@nextui-org/react'
-import React, { Key, useCallback, useContext, useEffect, useState } from 'react'
+import { ScheduleTableCellType } from '@/types/types';
+import { formatDate, formatTime, statusColorMap } from '@/utils/utils';
+import { Card, CardBody, Chip, Pagination, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, User } from '@nextui-org/react'
+import React, { Key, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ComponentContext } from '../context/context';
 
 type SchedOptionType = 'previous' | 'present' | 'future'
@@ -20,6 +20,8 @@ const SchedulePage = () =>
       present: [],
       future: [],
    } )
+
+   const [activeTab, setActiveTab] = useState<SchedOptionType>( 'present' )
 
    let tabs = [
       {
@@ -38,20 +40,20 @@ const SchedulePage = () =>
 
    const scheduleTableColumns = [
       {
-         name: "INTERVIEWER",
-         uid: 'interviewer'
+         name: "APPLICANT",
+         uid: 'applicant'
       },
       {
          name: "APPOINTMENT",
          uid: 'appointment'
       },
       {
-         name: "APPLICANT",
-         uid: 'applicant'
+         name: "INTERVIEWER",
+         uid: 'interviewer'
       },
       {
-         name: "ROLE",
-         uid: 'role'
+         name: "POSITION",
+         uid: 'position'
       },
       {
          name: "DATE",
@@ -67,6 +69,18 @@ const SchedulePage = () =>
       },
    ]
 
+   const [page, setPage] = useState( 1 );
+   const rowsPerPage = 6;
+
+   const pages = Math.ceil( schedules[activeTab].length / rowsPerPage );
+
+   const items = useMemo( () =>
+   {
+      const start = ( page - 1 ) * rowsPerPage;
+      const end = start + rowsPerPage;
+      return schedules[activeTab].slice( start, end );
+   }, [page, schedules, activeTab] );
+
    const renderCell = useCallback( ( data: ScheduleTableCellType, columnKey: Key ) =>
    {
       const cellValue = data[columnKey as keyof ScheduleTableCellType];
@@ -78,6 +92,25 @@ const SchedulePage = () =>
                <Chip className="capitalize" color={statusColorMap[data.status]} size="sm" variant="flat">
                   {cellValue}
                </Chip>
+            );
+
+         case "date":
+            return (
+               <p>{formatDate( data.date )}</p>
+            )
+
+         case "time":
+            return (
+               <p>{formatTime( data.timeStart )} - {formatTime( data.timeEnd )}</p>
+            )
+
+         case "applicant":
+            return (
+               <User
+                  avatarProps={{ radius: "lg", name: data.applicant, src: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' }}
+                  description={'ralfrenzbantilo@gmail.com'}
+                  name={cellValue}
+               ></User>
             );
 
          default:
@@ -95,10 +128,11 @@ const SchedulePage = () =>
       }
    }, [context?.applicantList] )
 
-
    return (
       <div className="flex w-full flex-col h-full">
-         <Tabs aria-label="Dynamic tabs" color='success' variant='bordered' className='dark' fullWidth items={tabs}>
+         <Tabs aria-label="Dynamic tabs" color='success' variant='bordered' className='dark' fullWidth items={tabs} selectedKey={activeTab}
+            onSelectionChange={( e ) => setActiveTab( e as SchedOptionType )}
+         >
             {( item ) => (
                <Tab key={item.id} title={
                   <div className="flex items-center space-x-2">
@@ -115,6 +149,19 @@ const SchedulePage = () =>
                            color='success'
                            selectionMode="single"
                            aria-label="Example static collection table"
+                           bottomContent={
+                              <div className="flex w-full justify-center">
+                                 <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    color="success"
+                                    page={page}
+                                    total={pages}
+                                    onChange={( page ) => setPage( page )}
+                                 />
+                              </div>
+                           }
                         >
                            <TableHeader columns={scheduleTableColumns}>
                               {( column ) => (
@@ -126,7 +173,7 @@ const SchedulePage = () =>
                                  </TableColumn>
                               )}
                            </TableHeader>
-                           <TableBody emptyContent={"No appointments found"} items={schedules[item.id as SchedOptionType]} className="bg-blue-500">
+                           <TableBody emptyContent={"No appointments found"} items={items} className="bg-blue-500">
                               {( item ) => (
                                  <TableRow key={item.id}>
                                     {( columnKey ) => <TableCell>{renderCell( item, columnKey )}</TableCell>}

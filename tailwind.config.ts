@@ -13,7 +13,7 @@ const config: Config = {
       colors: {
         'accent-primary': '#E7F1F3',
         'accent-secondary': '#CBDDE0',
-        'border-color': '#25333F',
+        'border-color': '#253f36',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
