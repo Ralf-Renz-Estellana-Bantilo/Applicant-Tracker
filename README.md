@@ -2,7 +2,25 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+First, clone this repository:
+
+```bash
+git clone https://github.com/Ralf-Renz-Estellana-Bantilo/applicant-tracker.git
+```
+
+Then, install the required packages:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+Lastly, run the development server:
 
 ```bash
 npm run dev
