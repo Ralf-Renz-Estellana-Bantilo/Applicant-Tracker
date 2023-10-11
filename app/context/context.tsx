@@ -87,11 +87,11 @@ export default function ComponentContextProvider ( { children }: { children: Rea
       if ( transactionListDBSession )
       {
          const parsedTransactionListDB: TransactionType[] = JSON.parse( transactionListDBSession )
-         const filterTransaction = parsedTransactionListDB.filter( transaction => transaction.applicantID === applicantID && transaction.createdBy === session?.user?.email )
-
+         const filterTransaction = parsedTransactionListDB.filter( transaction => transaction.applicantID === applicantID && ( transaction.createdBy === session?.user?.email || transaction.createdBy === 'admin' ) )
          return filterTransaction
       } else
       {
+         console.log( transactionList )
          return transactionList.filter( transaction => transaction.applicantID === applicantID )
       }
    }

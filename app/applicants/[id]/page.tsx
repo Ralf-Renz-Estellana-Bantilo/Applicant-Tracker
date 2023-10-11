@@ -229,6 +229,7 @@ const page = () =>
          if ( !filterApplicant ) return back()
 
          const applicantTransaction = ( getTransactionPerApplicant( applicantID ) as TransactionType[] )
+         console.log( applicantTransaction )
          setTransactions( applicantTransaction )
 
          if ( applicantTransaction.length > 0 )
