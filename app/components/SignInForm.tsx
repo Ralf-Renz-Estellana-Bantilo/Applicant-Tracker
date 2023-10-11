@@ -9,7 +9,8 @@ const SignInForm = () =>
 {
    const handleSignIn = () =>
    {
-      signIn( 'google', { callbackUrl: 'http://localhost:3000/dashboard' } )
+      const callbackUrl = 'http://localhost:3000/dashboard'
+      signIn( 'google', { callbackUrl } )
    }
 
    return (

@@ -1,18 +1,19 @@
 'use client'
 
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import SidebarButton from "./components/SidebarButton";
 import { ComponentContext } from './context/context';
 import { Avatar, Button } from '@nextui-org/react';
 import { UmpisaLogo } from '@/icons/icons';
-import { signIn, signOut, useSession, getProviders } from 'next-auth/react'
+import { signIn, signOut } from 'next-auth/react'
 import { redirect, usePathname } from 'next/navigation'
+import { removeSession } from '@/utils/utils';
+import useUserSession from './hooks/useUserSession';
 
 const Sidebar = () =>
 {
    const pathname = usePathname()
    const context = useContext( ComponentContext )
-   const token = getProviders()
 
    const isSidebarOpen = pathname != '/login'
 
@@ -20,6 +21,12 @@ const Sidebar = () =>
    {
       return
    }
+
+   useEffect( () =>
+   {
+      context?.initialize()
+   }, [] )
+
 
    return (
       <aside className="flex flex-col justify-between min-h-screen border-r-1 border-border-color">
@@ -41,7 +48,7 @@ const Sidebar = () =>
 
 function AuthButton ()
 {
-   const { data: session } = useSession();
+   const { session } = useUserSession();
 
    if ( !session )
    {
@@ -50,11 +57,14 @@ function AuthButton ()
 
    const handleSignIn = () =>
    {
-      signIn( 'google', { callbackUrl: 'http://localhost:3000/dashboard' } )
+      removeSession( 'page' )
+      const callbackUrl = 'http://localhost:3000/dashboard'
+      signIn( 'google', { callbackUrl } )
    }
 
    const handleSignOut = () =>
    {
+      removeSession( 'page' )
       signOut()
    }
 
@@ -80,7 +90,7 @@ function AuthButton ()
    return (
       <>
          <div className="flex flex-col justify-center p-3 gap-3">
-            <span >Not signed in</span>
+            <span className='text-center'>Not signed in</span>
             <Button color="success" onClick={handleSignIn} className='font-semibold rounded-lg' variant="solid">
                SIGN IN
             </Button>

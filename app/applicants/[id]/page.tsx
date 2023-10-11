@@ -8,36 +8,32 @@ import { ApplicantDataType, StatusType } from '@/types/types'
 import { ComponentContext } from '@/app/context/context'
 import { transactionColumns, transactionStatusOptions, transactionsList } from '@/app/data'
 
-const statusColorMap: Record<string, ChipProps["color"]> = {
-   passed: "success",
-   active: "success",
-   failed: "danger",
-   unselected: "danger",
-   pending: "warning",
-};
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { capitalize, formatDate, formatTime } from '@/utils/utils'
+import { capitalize, formatDate, formatTime, statusColorMap } from '@/utils/utils'
+import useUserSession from '@/app/hooks/useUserSession'
 
 type TransactionType = typeof transactionsList[0] & { title?: string };
 
 const INITIAL_VISIBLE_COLUMNS = ["appointment", "interviewer", "type", "mode"];
-const INITIAL_FORMDATA: TransactionType = {
-   id: 0,
-   applicantID: 0,
-   appointment: '',
-   interviewer: '',
-   date: '',
-   timeStart: '',
-   timeEnd: '',
-   time: '--:-- - --:--',
-   status: 'pending',
-}
-
 
 const page = () =>
 {
    const { id } = useParams()
+   const { session } = useUserSession()
+   const INITIAL_FORMDATA: TransactionType = {
+      id: 0,
+      applicantID: Number( id ),
+      appointment: '',
+      interviewer: '',
+      date: '',
+      timeStart: '',
+      timeEnd: '',
+      time: '--:-- - --:--',
+      status: 'pending',
+      createdBy: session?.user?.email || '',
+   }
+
    const router = useRouter()
    const context = useContext( ComponentContext )
    const [applicant, setApplicant] = useState<ApplicantDataType | null>( null )
@@ -119,7 +115,7 @@ const page = () =>
          case "date":
             return <p>{formatDate( appointment.date )}</p>
          case "time":
-            return <p>{formatTime( appointment.timeStart )} - {formatTime( appointment.timeEnd )}</p>
+            return <p>{formatTime( appointment.timeStart || '' )} - {formatTime( appointment.timeEnd || '' )}</p>
          case "status":
             return (
                <Chip className="capitalize" color={statusColorMap[appointment.status]} size="sm" variant="flat">
@@ -134,11 +130,11 @@ const page = () =>
                         <EditIcon />
                      </span>
                   </Tooltip>
-                  <Tooltip className="dark" color="danger" content="Delete appointment">
+                  {/* <Tooltip className="dark" color="danger" content="Delete appointment">
                      <span className="text-lg text-danger cursor-pointer active:opacity-50">
                         <DeleteIcon />
                      </span>
-                  </Tooltip>
+                  </Tooltip> */}
                </div>
             );
          default:
@@ -154,7 +150,6 @@ const page = () =>
 
    const saveAppointment = ( fn: () => void ) =>
    {
-      const applicantID = Number( id )
       if ( context )
       {
          const { updateTransactionList, updateApplicantStatus } = context
@@ -178,7 +173,6 @@ const page = () =>
 
          if ( formData.id === 0 )
          {
-            formData.applicantID = applicantID
             formData.appointment = capitalize( formData.appointment )
             formData.interviewer = capitalize( formData.interviewer )
             formData.id = Math.floor( Math.random() * 1000 )
@@ -200,7 +194,7 @@ const page = () =>
          let status: StatusType = ( formData.status === 'failed' ? 'unselected' : 'active' ) as StatusType
          const newApplicantData = { ...applicant, status } as ApplicantDataType
          setApplicant( newApplicantData )
-         updateApplicantStatus( applicantID, status )
+         updateApplicantStatus( formData.applicantID, status )
 
          toast.success( alertMessage, {
             position: "bottom-right",
@@ -229,7 +223,7 @@ const page = () =>
       if ( context )
       {
          const { applicantList, getTransactionPerApplicant } = context
-         const applicantID = Number( id )
+         const applicantID = INITIAL_FORMDATA.applicantID
          const filterApplicant = applicantList?.find( ( app ) => app.id === applicantID )
 
          if ( !filterApplicant ) return back()
@@ -447,7 +441,7 @@ const page = () =>
                            </TableColumn>
                         )}
                      </TableHeader>
-                     <TableBody emptyContent={"No appointments found"} items={sortedItems} className="bg-blue-500">
+                     <TableBody emptyContent={"No appointments found"} items={transactions} className="bg-blue-500">
                         {( item ) => (
                            <TableRow key={item.appointment}>
                               {( columnKey ) => <TableCell>{renderCell( item, columnKey )}</TableCell>}

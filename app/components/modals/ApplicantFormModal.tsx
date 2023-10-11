@@ -1,21 +1,9 @@
 import { ComponentContext } from '@/app/context/context';
+import useUserSession from '@/app/hooks/useUserSession';
 import { ApplicantFormDataType } from '@/types/types';
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react'
 import React, { Dispatch, memo, useCallback, useContext, useRef, useState } from 'react'
 import { ToastContainer, toast } from "react-toastify";
-
-const INITIAL_FORMDATA: ApplicantFormDataType = {
-   id: 0,
-   avatar: 'https://images.unsplash.com/broken',
-   name: '',
-   contactNo: '',
-   email: '',
-   position: '',
-   team: '',
-   dateApplied: '',
-   status: 'pending',
-   title: 'Add New Appointment',
-}
 
 type ApplicantFormModalProp = {
    formData: ApplicantFormDataType,
@@ -27,6 +15,21 @@ type ApplicantFormModalProp = {
 const ApplicantFormModal = ( { isOpen, onOpenChange, formData, setFormData }: ApplicantFormModalProp ) =>
 {
    const context = useContext( ComponentContext )
+   const { session } = useUserSession()
+
+   const INITIAL_FORMDATA: ApplicantFormDataType = {
+      id: 0,
+      avatar: 'https://images.unsplash.com/broken',
+      name: '',
+      contactNo: '',
+      email: '',
+      position: '',
+      team: '',
+      dateApplied: '',
+      status: 'pending',
+      title: 'Add New Appointment',
+      createdBy: session?.user?.email || ''
+   }
 
    const handleChange = useCallback( ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) =>
    {
@@ -38,7 +41,7 @@ const ApplicantFormModal = ( { isOpen, onOpenChange, formData, setFormData }: Ap
    {
       if ( context )
       {
-         const { addNewApplicant, updateApplicantList } = context
+         const { updateApplicantList } = context
          const values = Object.values( formData )
          if ( values.includes( '' ) )
          {
@@ -60,11 +63,8 @@ const ApplicantFormModal = ( { isOpen, onOpenChange, formData, setFormData }: Ap
 
          if ( isNewApplicant )
          {
-            addNewApplicant( formData )
-            console.log( {
-               formData,
-               applicants: context.applicantList
-            } )
+            const newApplicant = { ...formData, createdBy: session?.user?.email || '' }
+            updateApplicantList( newApplicant )
             alert = 'New applicant added!'
          } else
          {

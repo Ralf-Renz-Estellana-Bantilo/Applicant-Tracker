@@ -2,12 +2,15 @@ import { ApplicantIcons, DashboardIcon, ScheduleIcon } from "@/icons/icons";
 import { ApplicantDataType, ApplicantStatusType, ContextValueType, RouteType, ScheduleTableCellType, StatusType, TableColumnType, TransactionType } from "@/types/types";
 import React, { ReactNode, createContext, useState, useEffect } from "react";
 import { columns, statusOptions, transactionsList as transactionData, users } from "../data";
+import { useSession } from "next-auth/react";
+import { getSession, setSession } from "@/utils/utils";
 
 export const ComponentContext = createContext<ContextValueType | null>( null )
 
 export default function ComponentContextProvider ( { children }: { children: ReactNode } )
 {
 
+   const { data: session } = useSession();
    const [routes] = useState<RouteType[]>( [
       {
          id: Math.floor( Math.random() * 100 ),
@@ -34,48 +37,91 @@ export default function ComponentContextProvider ( { children }: { children: Rea
 
    const [transactionList, setTransactionList] = useState<TransactionType[]>( transactionData )
 
+   const getApplicantListPerHR = ( list: ApplicantDataType[] ) =>
+   {
+      return session ? list.filter( ( { createdBy } ) => createdBy === 'admin' || createdBy === session.user?.email ) : []
+   }
+
    const addNewApplicant = ( newApplicant: ApplicantDataType ) =>
    {
-      setApplicantList( prevState => [...prevState, newApplicant] )
+      const newApplicantInfo = [...applicantList, newApplicant]
+      setSession( 'applicantListDB', JSON.stringify( newApplicantInfo ) )
+      setApplicantList( newApplicantInfo )
    }
 
    const deleteApplicant = ( applicantID: number ) =>
    {
-      setApplicantList( prevState => prevState.filter( ( { id } ) => id != applicantID ) )
+      const applicantListDBSession = getSession( 'applicantListDB' )
+      if ( applicantListDBSession )
+      {
+         const parsedTransactionListDB: ApplicantDataType[] = JSON.parse( applicantListDBSession )
+         const newApplicantInfo = parsedTransactionListDB.filter( ( { id } ) => id != applicantID )
+         setApplicantList( newApplicantInfo )
+         setSession( 'applicantListDB', JSON.stringify( newApplicantInfo ) )
+      }
    }
    const updateApplicantList = ( newApplicant: ApplicantDataType, applicantID?: number ) =>
    {
+      let newApplicantInfo: ApplicantDataType[] = []
       if ( !applicantID )
       {
-         const newApplicantInfo = { ...newApplicant, id: Math.floor( Math.random() * 100000 ) }
-         setApplicantList( prevState => [...prevState, newApplicantInfo] )
+         const applicantData = { ...newApplicant, id: Math.floor( Math.random() * 100000 ) }
+         newApplicantInfo = [...applicantList, applicantData]
+         setApplicantList( newApplicantInfo )
       } else
       {
-         setApplicantList( prevState => prevState.map( state => state.id === applicantID
-            ? newApplicant : state ) )
+         newApplicantInfo = applicantList.map( applicant =>
+         {
+            return applicant.id === applicantID
+               ? newApplicant : applicant
+         } )
+         setApplicantList( newApplicantInfo )
       }
+      setSession( 'applicantListDB', JSON.stringify( newApplicantInfo ) )
    }
 
    const getTransactionPerApplicant = ( applicantID: number ): TransactionType[] | [] =>
    {
-      const filterTransaction = transactionList.filter( transaction => transaction.applicantID === applicantID )
+      const transactionListDBSession = getSession( 'transactionListDB' )
 
-      return filterTransaction
+      if ( transactionListDBSession )
+      {
+         const parsedTransactionListDB: TransactionType[] = JSON.parse( transactionListDBSession )
+         const filterTransaction = parsedTransactionListDB.filter( transaction => transaction.applicantID === applicantID && transaction.createdBy === session?.user?.email )
+
+         return filterTransaction
+      } else
+      {
+         return transactionList.filter( transaction => transaction.applicantID === applicantID )
+      }
+   }
+
+   const getTransactionListPerHR = ( list: TransactionType[] ) =>
+   {
+      return session ? list.filter( ( { createdBy } ) => createdBy === 'admin' || createdBy === session.user?.email ) : []
    }
 
    const updateTransactionList = ( newTransaction: TransactionType, appointmentID?: number ) =>
    {
+      let transactionListDB: TransactionType[] = []
       if ( appointmentID )
       {
-         setTransactionList( prevState => prevState.map( ( state ) =>
+         transactionListDB = transactionList.map( transaction =>
          {
-            return state.id === appointmentID ? newTransaction : state
-         } ) )
+            return transaction.id === appointmentID ? newTransaction : transaction
+         } )
       } else
       {
-         const newTransactionInfo = { ...newTransaction, id: Math.floor( Math.random() * 1000000 ) }
-         setTransactionList( prevState => [...prevState, newTransactionInfo] )
+         const newTransactionInfo: TransactionType = {
+            ...newTransaction,
+            id: Math.floor( Math.random() * 1000000 ),
+            createdBy: session?.user?.email || '',
+         }
+         transactionListDB = [...transactionList, newTransactionInfo]
       }
+
+      setTransactionList( transactionListDB )
+      setSession( 'transactionListDB', JSON.stringify( transactionListDB ) )
    }
 
    const updateApplicantStatus = ( applicantID: number, status: StatusType ) =>
@@ -95,6 +141,10 @@ export default function ComponentContextProvider ( { children }: { children: Rea
          present: [],
          future: [],
       }
+
+      const holdPreviousSchedules: ScheduleTableCellType[] | [] = []
+      const holdPresentSchedules: ScheduleTableCellType[] | [] = []
+      const holdFutureSchedules: ScheduleTableCellType[] | [] = []
 
       transactionList.forEach( transaction =>
       {
@@ -130,7 +180,7 @@ export default function ComponentContextProvider ( { children }: { children: Rea
          )
          {
             // PRESENT ----------------------------------------------------------------
-            result.present.push( appointment as never )
+            holdPresentSchedules.push( appointment as never )
          } else if (
             currentYear <= appointmentYear &&
             currentMonth <= appointmentMonth &&
@@ -138,16 +188,60 @@ export default function ComponentContextProvider ( { children }: { children: Rea
          )
          {
             // FUTURE ----------------------------------------------------------------
-            result.future.push( appointment as never )
+            holdFutureSchedules.push( appointment as never )
          } else
          {
             // PAST ----------------------------------------------------------------
-            result.previous.push( appointment as never )
+            holdPreviousSchedules.push( appointment as never )
          }
-
       } )
 
+      result.previous = holdPreviousSchedules.filter( sched => sched.applicant ).sort(
+         ( a, b ) =>
+         {
+            return a.date < b.date ? 1 : -1;
+         }
+      )
+      result.present = holdPresentSchedules.filter( sched => sched.applicant ).sort(
+         ( a, b ) =>
+         {
+            return a.date < b.date ? 1 : -1;
+         }
+      )
+      result.future = holdFutureSchedules.filter( sched => sched.applicant ).sort(
+         ( a, b ) =>
+         {
+            return a.date < b.date ? 1 : -1;
+         }
+      )
+
       return result
+   }
+
+   const initialize = () =>
+   {
+      const applicantListDBSession = getSession( 'applicantListDB' )
+      const transactionListDBSession = getSession( 'transactionListDB' )
+
+      if ( applicantListDBSession )
+      {
+         const parsedApplicantListDB = JSON.parse( applicantListDBSession )
+         setApplicantList( getApplicantListPerHR( parsedApplicantListDB ) )
+      } else
+      {
+         setSession( 'applicantListDB', JSON.stringify( applicantList ) )
+         setApplicantList( prevState => getApplicantListPerHR( prevState ) )
+      }
+
+      if ( transactionListDBSession )
+      {
+         const parsedTransactionListDB = JSON.parse( transactionListDBSession )
+         setTransactionList( getTransactionListPerHR( parsedTransactionListDB ) )
+      } else
+      {
+         setSession( 'transactionListDB', JSON.stringify( transactionList ) )
+         setTransactionList( prevState => getTransactionListPerHR( prevState ) )
+      }
    }
 
    const value: ContextValueType = {
@@ -155,6 +249,7 @@ export default function ComponentContextProvider ( { children }: { children: Rea
       tableColumns,
       applicantStatusOptions,
       applicantList,
+      initialize,
       setTableColumns,
       setApplicantStatusOptions,
       getTransactionPerApplicant,
@@ -163,7 +258,7 @@ export default function ComponentContextProvider ( { children }: { children: Rea
       getScheduledAppointments,
       addNewApplicant,
       deleteApplicant,
-      updateApplicantList
+      updateApplicantList,
    }
 
    return (

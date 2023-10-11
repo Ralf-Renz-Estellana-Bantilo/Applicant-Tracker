@@ -6,13 +6,9 @@ export default async function Home ()
   const session = await getServerSession();
   if ( !session || !session.user )
   {
-    redirect( "/login" );
+    return redirect( "/login" );
   } else
   {
-    redirect( "/dashboard" );
+    return redirect( "/dashboard" );
   }
-
-  return (
-    <div>Home Page</div>
-  )
 }

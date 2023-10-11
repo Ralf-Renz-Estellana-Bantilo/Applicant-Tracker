@@ -1,7 +1,6 @@
-import { ApplicantDataType } from "@/types/types";
+import { ApplicantDataType, TransactionType } from "@/types/types";
 
 const columns = [
-   // { name: "id", uid: "id", sortable: true },
    { name: "FULL NAME", uid: "name", sortable: true },
    { name: "CONTACT NO.", uid: "contactNo", sortable: true },
    { name: "DATE APPLIED", uid: "dateApplied" },
@@ -27,6 +26,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
+      createdBy: 'admin',
       email: "tony.reichert@example.com",
    },
    {
@@ -38,6 +38,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+      createdBy: 'admin',
       email: "zoey.lang@example.com",
    },
    {
@@ -49,6 +50,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+      createdBy: 'admin',
       email: "jane.fisher@example.com",
    },
    {
@@ -60,6 +62,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a048581f4e29026701d",
+      createdBy: 'admin',
       email: "william.howard@example.com",
    },
    {
@@ -71,6 +74,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a092581d4ef9026700d",
+      createdBy: 'admin',
       email: "kristen.cooper@example.com",
    },
    {
@@ -83,6 +87,7 @@ const users: ApplicantDataType[] = [
       avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
       email: "brian.kim@example.com",
       status: "active",
+      createdBy: 'admin',
    },
    {
       id: 7,
@@ -93,6 +98,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a042581f4e29027007d",
+      createdBy: 'admin',
       email: "michael.hunt@example.com",
    },
    {
@@ -104,6 +110,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?u=a042581f4e27027008d",
+      createdBy: 'admin',
       email: "samantha.brooks@example.com",
    },
    {
@@ -115,6 +122,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=4",
+      createdBy: 'admin',
       email: "frank.harrison@example.com",
    },
    {
@@ -126,6 +134,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=5",
+      createdBy: 'admin',
       email: "emma.adams@example.com",
    },
    {
@@ -137,6 +146,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=8",
+      createdBy: 'admin',
       email: "brandon.stevens@example.com",
    },
    {
@@ -148,6 +158,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=10",
+      createdBy: 'admin',
       email: "megan.richards@example.com",
    },
    {
@@ -159,6 +170,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=12",
+      createdBy: 'admin',
       email: "oliver.scott@example.com",
    },
    {
@@ -170,6 +182,7 @@ const users: ApplicantDataType[] = [
       status: "active",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=16",
+      createdBy: 'admin',
       email: "grace.allen@example.com",
    },
    {
@@ -181,6 +194,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=15",
+      createdBy: 'admin',
       email: "noah.carter@example.com",
    },
    {
@@ -192,6 +206,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=20",
+      createdBy: 'admin',
       email: "ava.perez@example.com",
    },
    {
@@ -203,6 +218,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=33",
+      createdBy: 'admin',
       email: "liam.johnson@example.com",
    },
    {
@@ -214,6 +230,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=29",
+      createdBy: 'admin',
       email: "sophia.taylor@example.com",
    },
    {
@@ -225,6 +242,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=50",
+      createdBy: 'admin',
       email: "lucas.harris@example.com",
    },
    {
@@ -236,6 +254,7 @@ const users: ApplicantDataType[] = [
       status: "pending",
       contactNo: "+639606528174",
       avatar: "https://i.pravatar.cc/150?img=45",
+      createdBy: 'admin',
       email: "mia.robinson@example.com",
    },
 ];
@@ -255,7 +274,7 @@ const transactionStatusOptions = [
    { name: "Pending", uid: "pending" },
 ];
 
-const transactionsList = [
+const transactionsList: TransactionType[] = [
    {
       id: Math.floor( Math.random() * 10000 ),
       applicantID: 1,
@@ -266,6 +285,7 @@ const transactionsList = [
       timeEnd: '10:00',
       time: '9:30 - 10:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -277,6 +297,7 @@ const transactionsList = [
       timeEnd: '11:00',
       time: '10:30 - 11:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -288,6 +309,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -299,6 +321,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -310,6 +333,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -321,6 +345,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -332,6 +357,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -343,6 +369,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -354,6 +381,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -365,6 +393,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -376,6 +405,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -387,6 +417,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -398,6 +429,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -409,6 +441,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -420,6 +453,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -431,6 +465,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'passed',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -442,6 +477,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
    {
       id: Math.floor( Math.random() * 10000 ),
@@ -453,6 +489,7 @@ const transactionsList = [
       timeEnd: '02:00',
       time: '01:30 - 02:00',
       status: 'pending',
+      createdBy: 'admin',
    },
 ]
 

@@ -1,6 +1,5 @@
 import { ChipProps } from "@nextui-org/react";
 import moment from "moment";
-import { getServerSession } from "next-auth";
 
 export function capitalize ( str: string )
 {
@@ -27,12 +26,12 @@ export function formatTime ( time: string )
 
 export const setSession = <T> ( key: string, value: T ) =>
 {
-  sessionStorage.setItem( key, `${value}` )
+  localStorage.setItem( key, `${value}` )
 }
 
 export const getSession = ( key: string ) =>
 {
-  return sessionStorage.getItem( key )
+  return localStorage.getItem( key )
 }
 
-export const removeSession = ( key: string ) => sessionStorage.removeItem( key )
+export const removeSession = ( key: string ) => localStorage.removeItem( key )

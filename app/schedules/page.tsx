@@ -70,7 +70,7 @@ const SchedulePage = () =>
    ]
 
    const [page, setPage] = useState( 1 );
-   const rowsPerPage = 6;
+   const rowsPerPage = 7;
 
    const pages = Math.ceil( schedules[activeTab].length / rowsPerPage );
 

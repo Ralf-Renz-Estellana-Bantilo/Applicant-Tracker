@@ -35,7 +35,8 @@ export type ContextValueType = {
       present: ScheduleTableCellType[] | [];
       future: ScheduleTableCellType[] | [];
    },
-   updateApplicantList: ( newApplicant: ApplicantDataType, applicantID?: number ) => void
+   updateApplicantList: ( newApplicant: ApplicantDataType, applicantID?: number ) => void,
+   initialize: () => void,
 }
 
 export type ApplicantDataType = {
@@ -48,6 +49,7 @@ export type ApplicantDataType = {
    contactNo: string;
    avatar: string;
    email: string;
+   createdBy: string,
 }
 
 export type TableColumnType = {
@@ -71,7 +73,7 @@ export type TransactionType = {
    timeEnd?: string;
    time: string;
    status: string
-   title?: string
+   createdBy: string,
 }
 
 export type ScheduleTableCellType = {

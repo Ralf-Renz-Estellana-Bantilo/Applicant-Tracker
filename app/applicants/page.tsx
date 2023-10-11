@@ -24,31 +24,33 @@ import
    Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Checkbox, Link, Tooltip
 } from "@nextui-org/react";
 import { } from "../data";
-import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/icons/icons";
+import { ChevronDownIcon, DeleteIcon, EditIcon, EyeIcon, PlusIcon, SearchIcon } from "@/icons/icons";
 import { capitalize, formatDate, getSession, setSession, statusColorMap } from "@/utils/utils";
 import { ComponentContext } from "../context/context";
 import { ApplicantDataType, ApplicantFormDataType } from "@/types/types";
-import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from "next/navigation";
 import ApplicantFormModal from "../components/modals/ApplicantFormModal";
+import useUserSession from "../hooks/useUserSession";
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "contactNo", "status", "actions"];
 
-const INITIAL_FORMDATA: ApplicantFormDataType = {
-   id: 0,
-   avatar: 'https://images.unsplash.com/broken',
-   name: '',
-   contactNo: '',
-   email: '',
-   position: '',
-   team: '',
-   dateApplied: '',
-   status: 'pending',
-}
-
 const ApplicantPage = () =>
 {
+   const { session } = useUserSession()
+   const INITIAL_FORMDATA: ApplicantFormDataType = {
+      id: 0,
+      avatar: 'https://images.unsplash.com/broken',
+      name: '',
+      contactNo: '',
+      email: '',
+      position: '',
+      team: '',
+      dateApplied: '',
+      status: 'pending',
+      createdBy: session?.user?.email || ''
+   }
+
    const { isOpen, onOpen, onOpenChange } = useDisclosure();
    const context = useContext( ComponentContext )
    const router = useRouter()
@@ -63,7 +65,6 @@ const ApplicantPage = () =>
       column: "age",
       direction: "ascending",
    } );
-
    const [page, setPage] = useState( 1 );
 
    const hasSearchFilter = Boolean( filterValue );
@@ -170,11 +171,11 @@ const ApplicantPage = () =>
                         <EditIcon />
                      </span>
                   </Tooltip>
-                  <Tooltip className="dark" color="danger" content="Delete user">
+                  {/* <Tooltip className="dark" color="danger" content="Delete user">
                      <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => deleteApplicant( user.id )}>
                         <DeleteIcon />
                      </span>
-                  </Tooltip>
+                  </Tooltip> */}
                </div>
             );
          default:
@@ -347,7 +348,7 @@ const ApplicantPage = () =>
             </div>
          </div>
       );
-   }, [selectedKeys, items.length, page, pages, hasSearchFilter] );
+   }, [selectedKeys, items.length, page, pages, hasSearchFilter, context?.applicantList?.length] );
 
    const toggleApplicantCreationDialog = ( form: ApplicantFormDataType, type: 'add' | 'edit' ) =>
    {
