@@ -107,8 +107,8 @@ const SchedulePage = () =>
          case "applicant":
             return (
                <User
-                  avatarProps={{ radius: "lg", name: data.applicant, src: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' }}
-                  description={'ralfrenzbantilo@gmail.com'}
+                  avatarProps={{ radius: "lg", name: data.applicant, src: data.avatar }}
+                  description={data.email}
                   name={cellValue}
                ></User>
             );

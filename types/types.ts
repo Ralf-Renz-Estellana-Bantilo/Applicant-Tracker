@@ -82,6 +82,8 @@ export type ScheduleTableCellType = {
    appointment: string;
    applicant?: string;
    applicantID: number;
+   avatar?: string
+   email?: string
    position: string;
    date: string;
    timeStart: string;

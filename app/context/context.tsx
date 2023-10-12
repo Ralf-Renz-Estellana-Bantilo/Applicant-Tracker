@@ -162,6 +162,8 @@ export default function ComponentContextProvider ( { children }: { children: Rea
             id: transaction.id,
             interviewer: transaction.interviewer,
             appointment: transaction.appointment,
+            avatar: applicantInfo?.avatar,
+            email: applicantInfo?.email,
             applicantID: transaction.applicantID,
             applicant: applicantInfo?.name,
             position: applicantInfo?.position || '',
